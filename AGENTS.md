@@ -28,3 +28,10 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+
+- All file conversions run in the browser (`src/lib/converters`), with each library loaded by dynamic import inside the tool function — keeps files private, needs no server, and keeps the first page load light.
+- UI text lives in `src/lib/i18n/dict.ts` (one typed dictionary per language, English is the key source); edit tools have their own names in `TOOL_TEXTS`, conversion tools build names from the `conv` template — so adding a tool or a language stays a data change.
+- Tools are defined once in `src/lib/tools.ts`; tool pages, the grid, the footer and `/sitemap.xml` all read from it, so a new tool appears everywhere automatically.
+- SSR always renders English; the visitor's language is applied after hydration from localStorage or the browser language — keeps search engines seeing one stable version per URL.
