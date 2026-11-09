@@ -171,7 +171,7 @@ async function imagesToPdf(files: File[]): Promise<OutFile[]> {
   }
   const bytes = await pdf.save();
   const name = files.length === 1 && files[0] ? `${baseName(files[0].name)}.pdf` : "images.pdf";
-  return [{ name, blob: new Blob([bytes as BlobPart], { type: PDF_MIME }) }];
+  return [{ name, blob: new Blob([new Uint8Array(bytes)], { type: PDF_MIME }) }];
 }
 
 async function wordToPdf(file: File): Promise<OutFile[]> {
@@ -281,7 +281,7 @@ async function loadPdfLib(file: File) {
 
 async function savePdf(doc: { save: () => Promise<Uint8Array> }, name: string): Promise<OutFile> {
   const bytes = await doc.save();
-  return { name, blob: new Blob([bytes as BlobPart], { type: PDF_MIME }) };
+  return { name, blob: new Blob([new Uint8Array(bytes)], { type: PDF_MIME }) };
 }
 
 async function mergePdf(files: File[]): Promise<OutFile[]> {
