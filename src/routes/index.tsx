@@ -10,13 +10,13 @@ import { useI18n } from "@/lib/i18n/context";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PDFKor — Free PDF Converter: Word, Excel, JPG to PDF & more" },
+      { title: "PDF ADIL — Free PDF Converter: Word, Excel, JPG to PDF & more" },
       {
         name: "description",
         content:
           "Free online tools to convert Word, Excel, PowerPoint and images to PDF and back, plus merge, split, compress and rotate PDF files. Works in 12 languages.",
       },
-      { property: "og:title", content: "PDFKor — Free PDF & File Converter" },
+      { property: "og:title", content: "PDF ADIL — Free PDF & File Converter" },
       {
         property: "og:description",
         content: "Convert, merge, split and compress PDF, Word, Excel and image files for free, right in your browser.",

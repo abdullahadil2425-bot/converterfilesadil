@@ -13,10 +13,10 @@ export function LogoMark({ className = "size-9" }: { className?: string }) {
 
 export function Logo() {
   return (
-    <Link to="/" className="flex items-center gap-2.5" aria-label="PDFKor home">
+    <Link to="/" className="flex items-center gap-2.5" aria-label="PDF ADIL home">
       <LogoMark />
       <span dir="ltr" className="font-display text-xl font-semibold tracking-tight text-foreground">
-        <span className="text-primary">PDF</span>Kor
+        <span className="text-primary">PDF</span> ADIL
       </span>
     </Link>
   );

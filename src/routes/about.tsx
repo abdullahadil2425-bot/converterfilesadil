@@ -8,12 +8,12 @@ import { LANGUAGES } from "@/lib/i18n/languages";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About PDFKor — Simple file tools in your language" },
+      { title: "About PDF ADIL — Simple file tools in your language" },
       {
         name: "description",
-        content: "PDFKor builds free, private, multilingual tools to convert and edit PDF, Word, Excel and image files.",
+        content: "PDF ADIL builds free, private, multilingual tools to convert and edit PDF, Word, Excel and image files.",
       },
-      { property: "og:title", content: "About PDFKor" },
+      { property: "og:title", content: "About PDF ADIL" },
       { property: "og:description", content: "Free, private, multilingual file tools that run in your browser." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
