@@ -171,7 +171,7 @@ async function imagesToPdf(files: File[]): Promise<OutFile[]> {
   }
   const bytes = await pdf.save();
   const name = files.length === 1 && files[0] ? `${baseName(files[0].name)}.pdf` : "images.pdf";
-  return [{ name, blob: new Blob([bytes], { type: PDF_MIME }) }];
+  return [{ name, blob: new Blob([bytes as BlobPart], { type: PDF_MIME }) }];
 }
 
 async function wordToPdf(file: File): Promise<OutFile[]> {
