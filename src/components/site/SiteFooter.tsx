@@ -41,7 +41,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-border">
         <p className="mx-auto max-w-6xl px-4 py-5 text-xs text-muted-foreground sm:px-6">
-          © {new Date().getFullYear()} PDFKor. {t("rights")}
+          © {new Date().getFullYear()} PDF ADIL. {t("rights")}
         </p>
       </div>
     </footer>

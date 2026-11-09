@@ -17,10 +17,10 @@ export const Route = createFileRoute("/tools/$slug")({
   head: ({ loaderData }) => {
     const tool = loaderData ? getTool(loaderData.slug) : undefined;
     if (!tool) {
-      return { meta: [{ title: "Tool not found — PDFKor" }, { name: "robots", content: "noindex" }] };
+      return { meta: [{ title: "Tool not found — PDF ADIL" }, { name: "robots", content: "noindex" }] };
     }
     const { name, description } = toolText(tool, "en");
-    const title = `${name} — Free Online Converter | PDFKor`;
+    const title = `${name} — Free Online Converter | PDF ADIL`;
     return {
       meta: [
         { title },
@@ -36,7 +36,7 @@ export const Route = createFileRoute("/tools/$slug")({
           children: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            name: `PDFKor ${name}`,
+            name: `PDF ADIL ${name}`,
             description,
             applicationCategory: "UtilitiesApplication",
             operatingSystem: "Any",

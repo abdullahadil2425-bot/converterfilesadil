@@ -7,13 +7,13 @@ import { useI18n } from "@/lib/i18n/context";
 export const Route = createFileRoute("/tools/")({
   head: () => ({
     meta: [
-      { title: "All PDF & File Tools — PDFKor" },
+      { title: "All PDF & File Tools — PDF ADIL" },
       {
         name: "description",
         content:
-          "Every free PDFKor tool in one place: Word to PDF, PDF to Word, Excel, PowerPoint, JPG, PNG, merge, split, compress, rotate and more.",
+          "Every free PDF ADIL tool in one place: Word to PDF, PDF to Word, Excel, PowerPoint, JPG, PNG, merge, split, compress, rotate and more.",
       },
-      { property: "og:title", content: "All PDF & File Tools — PDFKor" },
+      { property: "og:title", content: "All PDF & File Tools — PDF ADIL" },
       { property: "og:description", content: "Free tools to convert, merge, split and compress your files." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

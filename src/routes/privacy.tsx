@@ -6,9 +6,9 @@ import { useI18n } from "@/lib/i18n/context";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy — PDFKor" },
-      { name: "description", content: "PDFKor processes your files in your browser. Nothing is uploaded, stored or shared." },
-      { property: "og:title", content: "Privacy Policy — PDFKor" },
+      { title: "Privacy Policy — PDF ADIL" },
+      { name: "description", content: "PDF ADIL processes your files in your browser. Nothing is uploaded, stored or shared." },
+      { property: "og:title", content: "Privacy Policy — PDF ADIL" },
       { property: "og:description", content: "Your files never leave your device." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

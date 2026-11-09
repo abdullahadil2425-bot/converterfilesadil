@@ -82,15 +82,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "PDFKor — Free Online PDF & File Converter" },
+      { title: "PDF ADIL — Free Online PDF & File Converter" },
       {
         name: "description",
         content: "Convert, merge, split and compress PDF, Word, Excel, PowerPoint and image files for free, in 12 languages.",
       },
-      { name: "author", content: "PDFKor" },
+      { name: "author", content: "PDF ADIL" },
       { name: "theme-color", content: "#fbf7ef" },
-      { property: "og:site_name", content: "PDFKor" },
-      { property: "og:title", content: "PDFKor — Free Online PDF & File Converter" },
+      { property: "og:site_name", content: "PDF ADIL" },
+      { property: "og:title", content: "PDF ADIL — Free Online PDF & File Converter" },
       {
         property: "og:description",
         content: "Convert, merge, split and compress PDF, Word, Excel, PowerPoint and image files for free.",

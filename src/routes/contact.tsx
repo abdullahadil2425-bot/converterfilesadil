@@ -9,19 +9,19 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/lib/i18n/context";
 
-// Placeholder contact details — replace with the owner's real ones.
+// Owner contact details (location is still a placeholder).
 const CONTACT = {
-  email: "hello@pdfkor.com",
-  phone: "+93 700 000 000",
+  email: "abdullahadil2425@gmail.com",
+  phone: "+93 773 099 691",
   location: "Kabul, Afghanistan",
 };
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact PDFKor — Questions, ideas and support" },
-      { name: "description", content: "Get in touch with the PDFKor team by email, phone or WhatsApp." },
-      { property: "og:title", content: "Contact PDFKor" },
+      { title: "Contact PDF ADIL — Questions, ideas and support" },
+      { name: "description", content: "Get in touch with the PDF ADIL team by email, phone or WhatsApp." },
+      { property: "og:title", content: "Contact PDF ADIL" },
       { property: "og:description", content: "Questions, ideas or a tool you need? Get in touch." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -36,7 +36,7 @@ function ContactPage() {
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const subject = encodeURIComponent(`PDFKor — ${form.name}`);
+    const subject = encodeURIComponent(`PDF ADIL — ${form.name}`);
     const body = encodeURIComponent(`${form.message}\n\n${form.name}\n${form.email}`);
     window.location.href = `mailto:${CONTACT.email}?subject=${subject}&body=${body}`;
   };
