@@ -75,7 +75,7 @@ async function renderPdfPages(
     });
     page.cleanup();
   }
-  await doc.destroy();
+  await doc.cleanup();
   return out;
 }
 
@@ -122,7 +122,7 @@ async function extractPdfLines(file: File): Promise<Line[][]> {
     pages.push(lines);
     page.cleanup();
   }
-  await doc.destroy();
+  await doc.cleanup();
   return pages;
 }
 
