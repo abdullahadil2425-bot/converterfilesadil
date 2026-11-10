@@ -7,7 +7,7 @@ import { I18nProvider } from "@/lib/i18n/context";
 
 function renderHeader(withProvider: boolean) {
   const rootRoute = createRootRoute({
-    component: () => (withProvider ? <I18nProvider><SiteHeader /></I18nProvider> : <SiteHeader />),
+    component: () => (withProvider ? <I18nProvider lang="en"><SiteHeader /></I18nProvider> : <SiteHeader />),
   });
   const router = createRouter({
     routeTree: rootRoute,
