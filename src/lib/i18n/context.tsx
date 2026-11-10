@@ -38,25 +38,37 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     setLangState(next);
   }, []);
 
-  const value = useMemo<I18nValue>(() => {
-    const dict = DICTS[lang];
-    return {
-      lang,
-      dir: langDir(lang),
-      setLang,
-      t: (key, vars) => {
-        let text = dict[key] ?? DICTS.en[key];
-        if (vars) for (const [k, v] of Object.entries(vars)) text = text.replaceAll(`{${k}}`, v);
-        return text;
-      },
-    };
-  }, [lang, setLang]);
+  const value = useMemo<I18nValue>(
+    () => ({ lang, dir: langDir(lang), setLang, t: (key, vars) => translate(lang, key, vars) }),
+    [lang, setLang],
+  );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 
+function translate(lang: Lang, key: DictKey, vars?: Record<string, string>): string {
+  let text = DICTS[lang][key] ?? DICTS.en[key] ?? key;
+  if (vars) for (const [k, v] of Object.entries(vars)) text = text.replaceAll(`{${k}}`, v);
+  return text;
+}
+
+// Used when a component renders outside I18nProvider (error/not-found screens, a
+// stale hot-reload module): show default-language text instead of crashing the page.
+const FALLBACK: I18nValue = {
+  lang: DEFAULT_LANG,
+  dir: langDir(DEFAULT_LANG),
+  setLang: () => {},
+  t: (key, vars) => translate(DEFAULT_LANG, key, vars),
+};
+
+let warned = false;
+
 export function useI18n(): I18nValue {
   const ctx = useContext(I18nContext);
-  if (!ctx) throw new Error("useI18n must be used inside I18nProvider");
-  return ctx;
+  if (ctx) return ctx;
+  if (import.meta.env.DEV && !warned) {
+    warned = true;
+    console.warn("useI18n used outside I18nProvider; falling back to default language.");
+  }
+  return FALLBACK;
 }
