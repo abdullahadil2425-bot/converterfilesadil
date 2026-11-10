@@ -8,7 +8,7 @@ import { ToolWorkspace } from "@/components/tools/ToolWorkspace";
 import { useI18n } from "@/lib/i18n/context";
 import { getTool, TOOLS, toolText } from "@/lib/tools";
 
-export const Route = createFileRoute("/tools/$slug")({
+export const Route = createFileRoute("/{-$lang}/tools/$slug")({
   loader: ({ params }) => {
     const tool = getTool(params.slug);
     if (!tool) throw notFound();

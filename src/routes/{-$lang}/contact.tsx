@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/lib/i18n/context";
+import { langFromParam, seoHead } from "@/lib/seo";
 
 // Owner contact details (location is still a placeholder).
 const CONTACT = {
@@ -16,7 +17,7 @@ const CONTACT = {
   location: "Kabul, Afghanistan",
 };
 
-export const Route = createFileRoute("/contact")({
+export const Route = createFileRoute("/{-$lang}/contact")({
   head: () => ({
     meta: [
       { title: "Contact PDF ADIL — Questions, ideas and support" },

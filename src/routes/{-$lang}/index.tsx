@@ -7,7 +7,7 @@ import { ToolGrid } from "@/components/tools/ToolGrid";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n/context";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/{-$lang}/")({
   head: () => ({
     meta: [
       { title: "PDF ADIL — Free PDF Converter: Word, Excel, JPG to PDF & more" },
