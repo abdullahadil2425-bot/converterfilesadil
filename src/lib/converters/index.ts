@@ -1,6 +1,10 @@
 // Every conversion runs in the visitor's browser. Libraries load lazily per tool.
 import { parsePageRanges } from "../page-ranges";
-import { htmlToPdf, sanitizeHtml, textToHtml } from "./render-html";
+import * as docs from "./docs";
+import { escapeHtml, htmlToPdf, sanitizeHtml, textToHtml } from "./render-html";
+import { baseName, encodeBmp, encodeIco, isRtl, one, readInput, textBlob, wrapHtml, ToolError, type OutFile } from "./shared";
+
+export { ToolError, type OutFile } from "./shared";
 
 export type Quality = "low" | "med" | "high";
 export type RunOptions = {
@@ -10,15 +14,6 @@ export type RunOptions = {
   watermark: string;
   pasted: string;
 };
-export type OutFile = { name: string; blob: Blob };
-
-export class ToolError extends Error {
-  constructor(public code: "pages" | "nofile" | "generic") {
-    super(code);
-  }
-}
-
-const baseName = (name: string) => name.replace(/\.[^.]+$/, "") || "file";
 const PDF_MIME = "application/pdf";
 
 // ---------- pdf.js helpers ----------
@@ -43,12 +38,13 @@ function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality?: number)
   );
 }
 
+type ImageMime = "image/jpeg" | "image/png" | "image/webp";
 type RenderedPage = { blob: Blob; widthPt: number; heightPt: number; dataUrl?: string };
 
 async function renderPdfPages(
   file: File,
   scale: number,
-  type: "image/jpeg" | "image/png",
+  type: ImageMime,
   quality = 0.9,
   withDataUrl = false,
 ): Promise<RenderedPage[]> {
@@ -144,9 +140,35 @@ async function loadImageCanvas(file: File, background?: string): Promise<HTMLCan
   return canvas;
 }
 
-async function convertImage(file: File, type: "image/jpeg" | "image/png" | "image/webp", ext: string): Promise<OutFile> {
+async function convertImage(file: File, type: ImageMime, ext: string): Promise<OutFile> {
   const canvas = await loadImageCanvas(file, type === "image/jpeg" ? "#ffffff" : undefined);
   return { name: `${baseName(file.name)}.${ext}`, blob: await canvasToBlob(canvas, type, 0.92) };
+}
+
+async function imageToBmp(file: File): Promise<OutFile> {
+  const canvas = await loadImageCanvas(file, "#ffffff");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas not available");
+  const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const bytes = encodeBmp(canvas.width, canvas.height, data);
+  return { name: `${baseName(file.name)}.bmp`, blob: new Blob([bytes.buffer as ArrayBuffer], { type: "image/bmp" }) };
+}
+
+async function imageToIco(file: File): Promise<OutFile> {
+  const src = await loadImageCanvas(file);
+  const size = Math.min(256, Math.max(src.width, src.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas not available");
+  const scale = Math.min(size / src.width, size / src.height);
+  const w = src.width * scale;
+  const h = src.height * scale;
+  ctx.drawImage(src, (size - w) / 2, (size - h) / 2, w, h);
+  const png = new Uint8Array(await (await canvasToBlob(canvas, "image/png")).arrayBuffer());
+  const bytes = encodeIco(png, size, size);
+  return { name: `${baseName(file.name)}.ico`, blob: new Blob([bytes.buffer as ArrayBuffer], { type: "image/x-icon" }) };
 }
 
 // ---------- tool implementations ----------
@@ -193,20 +215,15 @@ async function excelToPdf(file: File): Promise<OutFile[]> {
 }
 
 async function textToPdf(files: File[], pasted: string): Promise<OutFile[]> {
-  const file = files[0];
-  const text = file ? await file.text() : pasted;
-  if (!text.trim()) throw new ToolError("nofile");
-  return [{ name: `${file ? baseName(file.name) : "text"}.pdf`, blob: await htmlToPdf(textToHtml(text)) }];
+  const { text, name } = await readInput(files, pasted, "text");
+  return [{ name: `${name}.pdf`, blob: await htmlToPdf(textToHtml(text)) }];
 }
 
 async function htmlFileToPdf(files: File[], pasted: string): Promise<OutFile[]> {
-  const file = files[0];
-  const html = file ? await file.text() : pasted;
-  if (!html.trim()) throw new ToolError("nofile");
-  return [{ name: `${file ? baseName(file.name) : "page"}.pdf`, blob: await htmlToPdf(sanitizeHtml(html)) }];
+  const { text, name } = await readInput(files, pasted, "page");
+  return [{ name: `${name}.pdf`, blob: await htmlToPdf(sanitizeHtml(text)) }];
 }
 
-const isRtl = (s: string) => /[\u0590-\u08FF\uFB1D-\uFEFC]/.test(s);
 
 async function pdfToWord(file: File): Promise<OutFile[]> {
   const [pages, docx] = await Promise.all([extractPdfLines(file), import("docx")]);
@@ -244,10 +261,19 @@ async function pdfToExcel(file: File): Promise<OutFile[]> {
 async function pdfToText(file: File): Promise<OutFile[]> {
   const pages = await extractPdfLines(file);
   const text = pages.map((lines) => lines.map((l) => l.text).join("\n")).join("\n\n");
-  return [{ name: `${baseName(file.name)}.txt`, blob: new Blob([text], { type: "text/plain;charset=utf-8" }) }];
+  return [{ name: `${baseName(file.name)}.txt`, blob: textBlob(text, "text/plain") }];
 }
 
-async function pdfToImages(file: File, type: "image/jpeg" | "image/png", ext: string): Promise<OutFile[]> {
+async function pdfToHtml(file: File): Promise<OutFile[]> {
+  const pages = await extractPdfLines(file);
+  const body = pages
+    .map((lines, i) => `<section>\n<!-- page ${i + 1} -->\n${lines.map((l) => `<p dir="auto">${escapeHtml(l.text)}</p>`).join("\n")}\n</section>`)
+    .join("\n<hr>\n");
+  const name = baseName(file.name);
+  return [{ name: `${name}.html`, blob: textBlob(wrapHtml(body, name), "text/html") }];
+}
+
+async function pdfToImages(file: File, type: ImageMime, ext: string): Promise<OutFile[]> {
   const pages = await renderPdfPages(file, 2, type, 0.92);
   const base = baseName(file.name);
   return pages.map((p, i) => ({ name: pages.length > 1 ? `${base}-${i + 1}.${ext}` : `${base}.${ext}`, blob: p.blob }));
@@ -418,61 +444,65 @@ async function compressPdf(file: File, quality: Quality): Promise<OutFile[]> {
   return [result];
 }
 
-export async function runTool(slug: string, files: File[], opts: RunOptions): Promise<OutFile[]> {
-  const first = files[0];
-  const needsFile = !(slug === "text-to-pdf" || slug === "html-to-pdf");
-  if (needsFile && !first) throw new ToolError("nofile");
-  const f = first as File;
+type Handler = (files: File[], opts: RunOptions) => Promise<OutFile[]>;
 
-  switch (slug) {
-    case "word-to-pdf":
-      return wordToPdf(f);
-    case "excel-to-pdf":
-      return excelToPdf(f);
-    case "jpg-to-pdf":
-    case "png-to-pdf":
-      return imagesToPdf(files);
-    case "text-to-pdf":
-      return textToPdf(files, opts.pasted);
-    case "html-to-pdf":
-      return htmlFileToPdf(files, opts.pasted);
-    case "pdf-to-word":
-      return pdfToWord(f);
-    case "pdf-to-excel":
-      return pdfToExcel(f);
-    case "pdf-to-powerpoint":
-      return pdfToPowerPoint(f);
-    case "pdf-to-jpg":
-      return pdfToImages(f, "image/jpeg", "jpg");
-    case "pdf-to-png":
-      return pdfToImages(f, "image/png", "png");
-    case "pdf-to-text":
-      return pdfToText(f);
-    case "merge-pdf":
-      return mergePdf(files);
-    case "split-pdf":
-      return splitPdf(f);
-    case "compress-pdf":
-      return compressPdf(f, opts.quality);
-    case "rotate-pdf":
-      return rotatePdf(f, opts.angle);
-    case "add-page-numbers":
-      return addPageNumbers(f);
-    case "add-watermark":
-      return addWatermark(f, opts.watermark);
-    case "delete-pages":
-      return selectPages(f, opts.pages, "remove");
-    case "extract-pages":
-      return selectPages(f, opts.pages, "keep");
-    case "image-to-jpg":
-      return Promise.all(files.map((file) => convertImage(file, "image/jpeg", "jpg")));
-    case "image-to-png":
-      return Promise.all(files.map((file) => convertImage(file, "image/png", "png")));
-    case "image-to-webp":
-      return Promise.all(files.map((file) => convertImage(file, "image/webp", "webp")));
-    default:
-      throw new ToolError("generic");
-  }
+const eachImage =
+  (fn: (file: File) => Promise<OutFile>): Handler =>
+  (files) => {
+    one(files);
+    return Promise.all(files.map(fn));
+  };
+
+/** Every tool slug in `src/lib/tools.ts` must have a handler here. */
+export const HANDLERS: Record<string, Handler> = {
+  "word-to-pdf": (f) => wordToPdf(one(f)),
+  "excel-to-pdf": (f) => excelToPdf(one(f)),
+  "powerpoint-to-pdf": (f) => docs.powerpointToPdf(f),
+  "jpg-to-pdf": (f) => (one(f), imagesToPdf(f)),
+  "png-to-pdf": (f) => (one(f), imagesToPdf(f)),
+  "image-to-pdf": (f) => (one(f), imagesToPdf(f)),
+  "text-to-pdf": (f, o) => textToPdf(f, o.pasted),
+  "html-to-pdf": (f, o) => htmlFileToPdf(f, o.pasted),
+  "pdf-to-word": (f) => pdfToWord(one(f)),
+  "pdf-to-excel": (f) => pdfToExcel(one(f)),
+  "pdf-to-powerpoint": (f) => pdfToPowerPoint(one(f)),
+  "pdf-to-jpg": (f) => pdfToImages(one(f), "image/jpeg", "jpg"),
+  "pdf-to-png": (f) => pdfToImages(one(f), "image/png", "png"),
+  "pdf-to-webp": (f) => pdfToImages(one(f), "image/webp", "webp"),
+  "pdf-to-text": (f) => pdfToText(one(f)),
+  "pdf-to-html": (f) => pdfToHtml(one(f)),
+  "merge-pdf": (f) => (one(f), mergePdf(f)),
+  "split-pdf": (f) => splitPdf(one(f)),
+  "compress-pdf": (f, o) => compressPdf(one(f), o.quality),
+  "rotate-pdf": (f, o) => rotatePdf(one(f), o.angle),
+  "add-page-numbers": (f) => addPageNumbers(one(f)),
+  "add-watermark": (f, o) => addWatermark(one(f), o.watermark),
+  "delete-pages": (f, o) => selectPages(one(f), o.pages, "remove"),
+  "extract-pages": (f, o) => selectPages(one(f), o.pages, "keep"),
+  "word-to-text": (f) => docs.wordToText(f),
+  "word-to-html": (f) => docs.wordToHtml(f),
+  "text-to-word": (f, o) => docs.textToWord(f, o.pasted),
+  "html-to-word": (f, o) => docs.htmlToWord(f, o.pasted),
+  "html-to-text": (f, o) => docs.htmlToText(f, o.pasted),
+  "text-to-html": (f, o) => docs.textToHtml(f, o.pasted),
+  "excel-to-csv": (f) => docs.excelToCsv(f),
+  "csv-to-excel": (f, o) => docs.csvToExcel(f, o.pasted),
+  "excel-to-json": (f) => docs.excelToJson(f),
+  "json-to-excel": (f, o) => docs.jsonToExcel(f, o.pasted),
+  "excel-to-html": (f) => docs.excelToHtml(f),
+  "powerpoint-to-text": (f) => docs.powerpointToText(f),
+  "powerpoint-to-word": (f) => docs.powerpointToWord(f),
+  "image-to-jpg": eachImage((file) => convertImage(file, "image/jpeg", "jpg")),
+  "image-to-png": eachImage((file) => convertImage(file, "image/png", "png")),
+  "image-to-webp": eachImage((file) => convertImage(file, "image/webp", "webp")),
+  "image-to-bmp": eachImage(imageToBmp),
+  "image-to-ico": eachImage(imageToIco),
+};
+
+export async function runTool(slug: string, files: File[], opts: RunOptions): Promise<OutFile[]> {
+  const handler = HANDLERS[slug];
+  if (!handler) throw new ToolError("generic");
+  return handler(files, opts);
 }
 
 export async function zipFiles(files: OutFile[]): Promise<Blob> {
