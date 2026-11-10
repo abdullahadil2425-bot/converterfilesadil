@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useParams,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -16,6 +17,8 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { Toaster } from "@/components/ui/sonner";
 import { I18nProvider } from "@/lib/i18n/context";
+import { langDir } from "@/lib/i18n/languages";
+import { langFromParam } from "@/lib/seo";
 
 function NotFoundComponent() {
   return (
@@ -28,7 +31,8 @@ function NotFoundComponent() {
         </p>
         <div className="mt-6">
           <Link
-            to="/"
+            to="/{-$lang}"
+            params={{ lang: undefined }}
             className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Go home
@@ -116,13 +120,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const lang = langFromParam(useParams({ strict: false }).lang);
   return (
-    <html lang="en" dir="ltr">
+    <html lang={lang} dir={langDir(lang)}>
       <head>
         <HeadContent />
       </head>
       <body>
-        <I18nProvider>{children}</I18nProvider>
+        <I18nProvider lang={lang}>{children}</I18nProvider>
         <Scripts />
       </body>
     </html>
