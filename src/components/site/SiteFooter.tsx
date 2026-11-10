@@ -6,7 +6,8 @@ import { CATEGORIES, TOOLS, toolText } from "@/lib/tools";
 import { Logo } from "./Logo";
 
 export function SiteFooter() {
-  const { t, lang } = useI18n();
+  const { t, lang, langParam } = useI18n();
+  const params = { lang: langParam };
 
   return (
     <footer className="mt-24 border-t border-border bg-paper">
@@ -15,9 +16,9 @@ export function SiteFooter() {
           <Logo />
           <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">{t("footer_desc")}</p>
           <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-            <Link to="/about" className="text-muted-foreground hover:text-foreground">{t("nav_about")}</Link>
-            <Link to="/contact" className="text-muted-foreground hover:text-foreground">{t("nav_contact")}</Link>
-            <Link to="/privacy" className="text-muted-foreground hover:text-foreground">{t("privacy")}</Link>
+            <Link to="/{-$lang}/about" params={params} className="text-muted-foreground hover:text-foreground">{t("nav_about")}</Link>
+            <Link to="/{-$lang}/contact" params={params} className="text-muted-foreground hover:text-foreground">{t("nav_contact")}</Link>
+            <Link to="/{-$lang}/privacy" params={params} className="text-muted-foreground hover:text-foreground">{t("privacy")}</Link>
           </div>
         </div>
         {CATEGORIES.map((cat) => (
@@ -27,8 +28,8 @@ export function SiteFooter() {
               {TOOLS.filter((tool) => tool.category === cat).map((tool) => (
                 <li key={tool.slug}>
                   <Link
-                    to="/tools/$slug"
-                    params={{ slug: tool.slug }}
+                    to="/{-$lang}/tools/$slug"
+                    params={{ ...params, slug: tool.slug }}
                     className="text-sm text-muted-foreground transition-colors hover:text-primary"
                   >
                     {toolText(tool, lang).name}

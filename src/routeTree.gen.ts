@@ -9,35 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as ToolsIndexRouteImport } from './routes/tools.index'
-import { Route as ToolsSlugRouteImport } from './routes/tools.$slug'
+import { Route as Char123LangChar125RouteRouteImport } from './routes/{-$lang}/route'
+import { Route as Char123LangChar125IndexRouteImport } from './routes/{-$lang}/index'
+import { Route as Char123LangChar125AboutRouteImport } from './routes/{-$lang}/about'
+import { Route as Char123LangChar125ContactRouteImport } from './routes/{-$lang}/contact'
+import { Route as Char123LangChar125PrivacyRouteImport } from './routes/{-$lang}/privacy'
+import { Route as Char123LangChar125ToolsIndexRouteImport } from './routes/{-$lang}/tools.index'
+import { Route as Char123LangChar125ToolsSlugRouteImport } from './routes/{-$lang}/tools.$slug'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   id: '/robots.txt',
   path: '/robots.txt',
@@ -48,122 +29,122 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ToolsIndexRoute = ToolsIndexRouteImport.update({
-  id: '/tools/',
-  path: '/tools/',
+const Char123LangChar125RouteRoute = Char123LangChar125RouteRouteImport.update({
+  id: '/{-$lang}',
+  path: '/{-$lang}',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ToolsSlugRoute = ToolsSlugRouteImport.update({
-  id: '/tools/$slug',
-  path: '/tools/$slug',
-  getParentRoute: () => rootRouteImport,
+const Char123LangChar125IndexRoute = Char123LangChar125IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => Char123LangChar125RouteRoute,
 } as any)
+const Char123LangChar125AboutRoute = Char123LangChar125AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => Char123LangChar125RouteRoute,
+} as any)
+const Char123LangChar125ContactRoute =
+  Char123LangChar125ContactRouteImport.update({
+    id: '/contact',
+    path: '/contact',
+    getParentRoute: () => Char123LangChar125RouteRoute,
+  } as any)
+const Char123LangChar125PrivacyRoute =
+  Char123LangChar125PrivacyRouteImport.update({
+    id: '/privacy',
+    path: '/privacy',
+    getParentRoute: () => Char123LangChar125RouteRoute,
+  } as any)
+const Char123LangChar125ToolsIndexRoute =
+  Char123LangChar125ToolsIndexRouteImport.update({
+    id: '/tools/',
+    path: '/tools/',
+    getParentRoute: () => Char123LangChar125RouteRoute,
+  } as any)
+const Char123LangChar125ToolsSlugRoute =
+  Char123LangChar125ToolsSlugRouteImport.update({
+    id: '/tools/$slug',
+    path: '/tools/$slug',
+    getParentRoute: () => Char123LangChar125RouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/contact': typeof ContactRoute
-  '/privacy': typeof PrivacyRoute
+  '/{-$lang}': typeof Char123LangChar125RouteRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/tools/$slug': typeof ToolsSlugRoute
-  '/tools/': typeof ToolsIndexRoute
+  '/{-$lang}/about': typeof Char123LangChar125AboutRoute
+  '/{-$lang}/contact': typeof Char123LangChar125ContactRoute
+  '/{-$lang}/privacy': typeof Char123LangChar125PrivacyRoute
+  '/{-$lang}/': typeof Char123LangChar125IndexRoute
+  '/{-$lang}/tools/$slug': typeof Char123LangChar125ToolsSlugRoute
+  '/{-$lang}/tools/': typeof Char123LangChar125ToolsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/contact': typeof ContactRoute
-  '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/tools/$slug': typeof ToolsSlugRoute
-  '/tools': typeof ToolsIndexRoute
+  '/{-$lang}/about': typeof Char123LangChar125AboutRoute
+  '/{-$lang}/contact': typeof Char123LangChar125ContactRoute
+  '/{-$lang}/privacy': typeof Char123LangChar125PrivacyRoute
+  '/{-$lang}': typeof Char123LangChar125IndexRoute
+  '/{-$lang}/tools/$slug': typeof Char123LangChar125ToolsSlugRoute
+  '/{-$lang}/tools': typeof Char123LangChar125ToolsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/contact': typeof ContactRoute
-  '/privacy': typeof PrivacyRoute
+  '/{-$lang}': typeof Char123LangChar125RouteRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/tools/$slug': typeof ToolsSlugRoute
-  '/tools/': typeof ToolsIndexRoute
+  '/{-$lang}/about': typeof Char123LangChar125AboutRoute
+  '/{-$lang}/contact': typeof Char123LangChar125ContactRoute
+  '/{-$lang}/privacy': typeof Char123LangChar125PrivacyRoute
+  '/{-$lang}/': typeof Char123LangChar125IndexRoute
+  '/{-$lang}/tools/$slug': typeof Char123LangChar125ToolsSlugRoute
+  '/{-$lang}/tools/': typeof Char123LangChar125ToolsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
-    | '/about'
-    | '/contact'
-    | '/privacy'
+    | '/{-$lang}'
     | '/robots.txt'
     | '/sitemap.xml'
-    | '/tools/$slug'
-    | '/tools/'
+    | '/{-$lang}/about'
+    | '/{-$lang}/contact'
+    | '/{-$lang}/privacy'
+    | '/{-$lang}/'
+    | '/{-$lang}/tools/$slug'
+    | '/{-$lang}/tools/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
-    | '/about'
-    | '/contact'
-    | '/privacy'
     | '/robots.txt'
     | '/sitemap.xml'
-    | '/tools/$slug'
-    | '/tools'
+    | '/{-$lang}/about'
+    | '/{-$lang}/contact'
+    | '/{-$lang}/privacy'
+    | '/{-$lang}'
+    | '/{-$lang}/tools/$slug'
+    | '/{-$lang}/tools'
   id:
     | '__root__'
-    | '/'
-    | '/about'
-    | '/contact'
-    | '/privacy'
+    | '/{-$lang}'
     | '/robots.txt'
     | '/sitemap.xml'
-    | '/tools/$slug'
-    | '/tools/'
+    | '/{-$lang}/about'
+    | '/{-$lang}/contact'
+    | '/{-$lang}/privacy'
+    | '/{-$lang}/'
+    | '/{-$lang}/tools/$slug'
+    | '/{-$lang}/tools/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
-  ContactRoute: typeof ContactRoute
-  PrivacyRoute: typeof PrivacyRoute
+  Char123LangChar125RouteRoute: typeof Char123LangChar125RouteRouteWithChildren
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  ToolsSlugRoute: typeof ToolsSlugRoute
-  ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/robots.txt': {
       id: '/robots.txt'
       path: '/robots.txt'
@@ -178,32 +159,86 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tools/': {
-      id: '/tools/'
-      path: '/tools'
-      fullPath: '/tools/'
-      preLoaderRoute: typeof ToolsIndexRouteImport
+    '/{-$lang}': {
+      id: '/{-$lang}'
+      path: '/{-$lang}'
+      fullPath: '/{-$lang}'
+      preLoaderRoute: typeof Char123LangChar125RouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tools/$slug': {
-      id: '/tools/$slug'
+    '/{-$lang}/': {
+      id: '/{-$lang}/'
+      path: '/'
+      fullPath: '/{-$lang}/'
+      preLoaderRoute: typeof Char123LangChar125IndexRouteImport
+      parentRoute: typeof Char123LangChar125RouteRoute
+    }
+    '/{-$lang}/about': {
+      id: '/{-$lang}/about'
+      path: '/about'
+      fullPath: '/{-$lang}/about'
+      preLoaderRoute: typeof Char123LangChar125AboutRouteImport
+      parentRoute: typeof Char123LangChar125RouteRoute
+    }
+    '/{-$lang}/contact': {
+      id: '/{-$lang}/contact'
+      path: '/contact'
+      fullPath: '/{-$lang}/contact'
+      preLoaderRoute: typeof Char123LangChar125ContactRouteImport
+      parentRoute: typeof Char123LangChar125RouteRoute
+    }
+    '/{-$lang}/privacy': {
+      id: '/{-$lang}/privacy'
+      path: '/privacy'
+      fullPath: '/{-$lang}/privacy'
+      preLoaderRoute: typeof Char123LangChar125PrivacyRouteImport
+      parentRoute: typeof Char123LangChar125RouteRoute
+    }
+    '/{-$lang}/tools/': {
+      id: '/{-$lang}/tools/'
+      path: '/tools'
+      fullPath: '/{-$lang}/tools/'
+      preLoaderRoute: typeof Char123LangChar125ToolsIndexRouteImport
+      parentRoute: typeof Char123LangChar125RouteRoute
+    }
+    '/{-$lang}/tools/$slug': {
+      id: '/{-$lang}/tools/$slug'
       path: '/tools/$slug'
-      fullPath: '/tools/$slug'
-      preLoaderRoute: typeof ToolsSlugRouteImport
-      parentRoute: typeof rootRouteImport
+      fullPath: '/{-$lang}/tools/$slug'
+      preLoaderRoute: typeof Char123LangChar125ToolsSlugRouteImport
+      parentRoute: typeof Char123LangChar125RouteRoute
     }
   }
 }
 
+interface Char123LangChar125RouteRouteChildren {
+  Char123LangChar125AboutRoute: typeof Char123LangChar125AboutRoute
+  Char123LangChar125ContactRoute: typeof Char123LangChar125ContactRoute
+  Char123LangChar125PrivacyRoute: typeof Char123LangChar125PrivacyRoute
+  Char123LangChar125IndexRoute: typeof Char123LangChar125IndexRoute
+  Char123LangChar125ToolsSlugRoute: typeof Char123LangChar125ToolsSlugRoute
+  Char123LangChar125ToolsIndexRoute: typeof Char123LangChar125ToolsIndexRoute
+}
+
+const Char123LangChar125RouteRouteChildren: Char123LangChar125RouteRouteChildren =
+  {
+    Char123LangChar125AboutRoute: Char123LangChar125AboutRoute,
+    Char123LangChar125ContactRoute: Char123LangChar125ContactRoute,
+    Char123LangChar125PrivacyRoute: Char123LangChar125PrivacyRoute,
+    Char123LangChar125IndexRoute: Char123LangChar125IndexRoute,
+    Char123LangChar125ToolsSlugRoute: Char123LangChar125ToolsSlugRoute,
+    Char123LangChar125ToolsIndexRoute: Char123LangChar125ToolsIndexRoute,
+  }
+
+const Char123LangChar125RouteRouteWithChildren =
+  Char123LangChar125RouteRoute._addFileChildren(
+    Char123LangChar125RouteRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
-  ContactRoute: ContactRoute,
-  PrivacyRoute: PrivacyRoute,
+  Char123LangChar125RouteRoute: Char123LangChar125RouteRouteWithChildren,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  ToolsSlugRoute: ToolsSlugRoute,
-  ToolsIndexRoute: ToolsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
