@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
 
+import { useI18n } from "@/lib/i18n/context";
+
 export function LogoMark({ className = "size-9" }: { className?: string }) {
   return (
     <svg viewBox="0 0 40 40" className={className} aria-hidden="true">
@@ -12,8 +14,9 @@ export function LogoMark({ className = "size-9" }: { className?: string }) {
 }
 
 export function Logo() {
+  const { langParam } = useI18n();
   return (
-    <Link to="/" className="flex items-center gap-2.5" aria-label="PDF ADIL home">
+    <Link to="/{-$lang}" params={{ lang: langParam }} className="flex items-center gap-2.5" aria-label="PDF ADIL home">
       <LogoMark />
       <span dir="ltr" className="font-display text-xl font-semibold tracking-tight text-foreground">
         <span className="text-primary">PDF</span> ADIL

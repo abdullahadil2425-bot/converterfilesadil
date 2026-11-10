@@ -6,6 +6,7 @@ import { ToolCard } from "@/components/tools/ToolCard";
 import { ToolGraphic } from "@/components/tools/ToolGraphic";
 import { ToolWorkspace } from "@/components/tools/ToolWorkspace";
 import { useI18n } from "@/lib/i18n/context";
+import { langFromParam, seoHead, SITE_NAME } from "@/lib/seo";
 import { getTool, TOOLS, toolText } from "@/lib/tools";
 
 export const Route = createFileRoute("/{-$lang}/tools/$slug")({
@@ -14,30 +15,24 @@ export const Route = createFileRoute("/{-$lang}/tools/$slug")({
     if (!tool) throw notFound();
     return { slug: tool.slug };
   },
-  head: ({ loaderData }) => {
+  head: ({ params, loaderData }) => {
     const tool = loaderData ? getTool(loaderData.slug) : undefined;
     if (!tool) {
-      return { meta: [{ title: "Tool not found — PDF ADIL" }, { name: "robots", content: "noindex" }] };
+      return { meta: [{ title: `Unavailable — ${SITE_NAME}` }, { name: "robots", content: "noindex" }] };
     }
-    const { name, description } = toolText(tool, "en");
-    const title = `${name} — Free Online Converter | PDF ADIL`;
+    const lang = langFromParam(params.lang);
+    const { name, description } = toolText(tool, lang);
     return {
-      meta: [
-        { title },
-        { name: "description", content: `${description} No sign-up, no watermark, works in 12 languages.` },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
-        { property: "og:type", content: "website" },
-        { name: "twitter:card", content: "summary_large_image" },
-      ],
+      ...seoHead(lang, `/tools/${tool.slug}`),
       scripts: [
         {
           type: "application/ld+json",
           children: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            name: `PDF ADIL ${name}`,
+            name: `${SITE_NAME} ${name}`,
             description,
+            inLanguage: lang,
             applicationCategory: "UtilitiesApplication",
             operatingSystem: "Any",
             offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
@@ -51,7 +46,7 @@ export const Route = createFileRoute("/{-$lang}/tools/$slug")({
 
 function ToolPage() {
   const { slug } = Route.useLoaderData();
-  const { t, lang } = useI18n();
+  const { t, lang, langParam } = useI18n();
   const tool = getTool(slug);
   if (!tool) return null;
   const { name, description } = toolText(tool, lang);
@@ -62,9 +57,9 @@ function ToolPage() {
       <section className="bg-dots">
         <div className="mx-auto max-w-3xl px-4 pt-8 pb-8 sm:px-6">
           <nav className="flex items-center gap-1 text-sm text-muted-foreground" aria-label="Breadcrumb">
-            <Link to="/" className="hover:text-foreground">{t("nav_home")}</Link>
+            <Link to="/{-$lang}" params={{ lang: langParam }} className="hover:text-foreground">{t("nav_home")}</Link>
             <ChevronRight className="size-4 rtl:rotate-180" />
-            <Link to="/tools" className="hover:text-foreground">{t("nav_tools")}</Link>
+            <Link to="/{-$lang}/tools" params={{ lang: langParam }} className="hover:text-foreground">{t("nav_tools")}</Link>
             <ChevronRight className="size-4 rtl:rotate-180" />
             <span className="text-foreground">{name}</span>
           </nav>

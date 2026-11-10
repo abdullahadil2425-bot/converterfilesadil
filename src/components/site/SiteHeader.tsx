@@ -10,14 +10,14 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { Logo } from "./Logo";
 
 const NAV = [
-  { to: "/", key: "nav_home" },
-  { to: "/tools", key: "nav_tools" },
-  { to: "/about", key: "nav_about" },
-  { to: "/contact", key: "nav_contact" },
+  { to: "/{-$lang}", key: "nav_home" },
+  { to: "/{-$lang}/tools", key: "nav_tools" },
+  { to: "/{-$lang}/about", key: "nav_about" },
+  { to: "/{-$lang}/contact", key: "nav_contact" },
 ] as const;
 
 export function SiteHeader() {
-  const { t, dir } = useI18n();
+  const { t, dir, langParam } = useI18n();
   const [open, setOpen] = useState(false);
 
   return (
@@ -30,7 +30,8 @@ export function SiteHeader() {
             <Link
               key={item.to}
               to={item.to}
-              activeOptions={{ exact: item.to === "/" }}
+              params={{ lang: langParam }}
+              activeOptions={{ exact: item.to === "/{-$lang}" }}
               className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               activeProps={{ className: "bg-muted text-foreground" }}
             >
@@ -54,8 +55,9 @@ export function SiteHeader() {
                   <Link
                     key={item.to}
                     to={item.to}
+                    params={{ lang: langParam }}
                     onClick={() => setOpen(false)}
-                    activeOptions={{ exact: item.to === "/" }}
+                    activeOptions={{ exact: item.to === "/{-$lang}" }}
                     className="rounded-xl px-4 py-3 text-base font-medium text-foreground hover:bg-muted"
                     activeProps={{ className: "bg-muted" }}
                   >
