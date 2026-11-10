@@ -18,16 +18,7 @@ const CONTACT = {
 };
 
 export const Route = createFileRoute("/{-$lang}/contact")({
-  head: () => ({
-    meta: [
-      { title: "Contact PDF ADIL — Questions, ideas and support" },
-      { name: "description", content: "Get in touch with the PDF ADIL team by email, phone or WhatsApp." },
-      { property: "og:title", content: "Contact PDF ADIL" },
-      { property: "og:description", content: "Questions, ideas or a tool you need? Get in touch." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: ({ params }) => seoHead(langFromParam(params.lang), "/contact"),
   component: ContactPage,
 });
 

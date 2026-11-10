@@ -6,30 +6,15 @@ import { Features, HowItWorks } from "@/components/site/Sections";
 import { ToolGrid } from "@/components/tools/ToolGrid";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n/context";
+import { langFromParam, seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/{-$lang}/")({
-  head: () => ({
-    meta: [
-      { title: "PDF ADIL — Free PDF Converter: Word, Excel, JPG to PDF & more" },
-      {
-        name: "description",
-        content:
-          "Free online tools to convert Word, Excel, PowerPoint and images to PDF and back, plus merge, split, compress and rotate PDF files. Works in 12 languages.",
-      },
-      { property: "og:title", content: "PDF ADIL — Free PDF & File Converter" },
-      {
-        property: "og:description",
-        content: "Convert, merge, split and compress PDF, Word, Excel and image files for free, right in your browser.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: ({ params }) => seoHead(langFromParam(params.lang), "/"),
   component: Index,
 });
 
 function Index() {
-  const { t } = useI18n();
+  const { t, langParam } = useI18n();
 
   return (
     <>
@@ -51,7 +36,7 @@ function Index() {
                 </a>
               </Button>
               <Button asChild size="lg" variant="outline" className="gap-2 rounded-full bg-paper px-7 text-base">
-                <Link to="/contact">
+                <Link to="/{-$lang}/contact" params={{ lang: langParam }}>
                   <Mail className="size-4" /> {t("hero_cta2")}
                 </Link>
               </Button>
@@ -104,7 +89,7 @@ function Index() {
           <h2 className="text-3xl font-semibold">{t("contact_title")}</h2>
           <p className="max-w-lg opacity-80">{t("contact_sub")}</p>
           <Button asChild size="lg" className="gap-2 rounded-full px-7">
-            <Link to="/contact">
+            <Link to="/{-$lang}/contact" params={{ lang: langParam }}>
               <Mail className="size-4" /> {t("hero_cta2")}
             </Link>
           </Button>
