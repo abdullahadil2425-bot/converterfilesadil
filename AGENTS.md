@@ -29,6 +29,8 @@ use the editor.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
 
+- `I18nProvider` wraps the whole root shell, and `useI18n` falls back to the default language instead of throwing when no provider is found — a missing provider must never blank the page.
+
 ## Project rules
 
 - All file conversions run in the browser (`src/lib/converters`), with each library loaded by dynamic import inside the tool function — keeps files private, needs no server, and keeps the first page load light.
