@@ -2,6 +2,9 @@ import {
   ArrowRight,
   FileOutput,
   Hash,
+  Lock,
+  LockOpen,
+  PenLine,
   Merge,
   Minimize2,
   RotateCw,
@@ -23,6 +26,9 @@ const EDIT_ICONS: Record<EditIcon, LucideIcon> = {
   watermark: Stamp,
   delete: Trash2,
   extract: FileOutput,
+  protect: Lock,
+  unlock: LockOpen,
+  sign: PenLine,
 };
 
 function FileShape({ x, y, colorVar, badge, tilt = 0 }: { x: number; y: number; colorVar: string; badge: string; tilt?: number }) {
