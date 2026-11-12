@@ -34,7 +34,7 @@ export async function unlockPdf(file: File, password: string): Promise<OutFile[]
   } catch {
     throw new ToolError("password");
   }
-  doc.context.trailerInfo.Encrypt = undefined;
+  delete (doc.context.trailerInfo as { Encrypt?: unknown }).Encrypt;
   return [await save(doc, `${baseName(file.name)}-unlocked.pdf`)];
 }
 
