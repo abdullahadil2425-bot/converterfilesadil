@@ -1,7 +1,7 @@
 export type OutFile = { name: string; blob: Blob };
 
 export class ToolError extends Error {
-  constructor(public code: "pages" | "nofile" | "generic") {
+  constructor(public code: "pages" | "nofile" | "generic" | "password" | "signature") {
     super(code);
   }
 }

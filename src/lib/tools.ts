@@ -3,8 +3,8 @@ import type { Lang } from "./i18n/languages";
 
 export type Fmt = "pdf" | "word" | "excel" | "ppt" | "jpg" | "png" | "webp" | "bmp" | "ico" | "image" | "text" | "html" | "csv" | "json";
 export type ToolCategory = "to_pdf" | "from_pdf" | "edit" | "docs" | "image";
-export type ToolOption = "quality" | "angle" | "pages" | "watermark";
-export type EditIcon = "merge" | "split" | "compress" | "rotate" | "numbers" | "watermark" | "delete" | "extract";
+export type ToolOption = "quality" | "angle" | "pages" | "watermark" | "password" | "signature";
+export type EditIcon = "merge" | "split" | "compress" | "rotate" | "numbers" | "watermark" | "delete" | "extract" | "protect" | "unlock" | "sign";
 
 export type ToolDef = {
   slug: string;
@@ -69,6 +69,9 @@ export const TOOLS: ToolDef[] = [
   { slug: "add-watermark", category: "edit", from: "pdf", to: "pdf", accept: PDF, multiple: false, option: "watermark", edit: { key: "add-watermark", icon: "watermark" } },
   { slug: "delete-pages", category: "edit", from: "pdf", to: "pdf", accept: PDF, multiple: false, option: "pages", edit: { key: "delete-pages", icon: "delete" } },
   { slug: "extract-pages", category: "edit", from: "pdf", to: "pdf", accept: PDF, multiple: false, option: "pages", edit: { key: "extract-pages", icon: "extract" } },
+  { slug: "protect-pdf", category: "edit", from: "pdf", to: "pdf", accept: PDF, multiple: false, option: "password", edit: { key: "protect-pdf", icon: "protect" } },
+  { slug: "unlock-pdf", category: "edit", from: "pdf", to: "pdf", accept: PDF, multiple: false, option: "password", edit: { key: "unlock-pdf", icon: "unlock" } },
+  { slug: "sign-pdf", category: "edit", from: "pdf", to: "pdf", accept: PDF, multiple: false, option: "signature", edit: { key: "sign-pdf", icon: "sign" } },
   { slug: "word-to-text", category: "docs", from: "word", to: "text", accept: WORD, multiple: false },
   { slug: "word-to-html", category: "docs", from: "word", to: "html", accept: WORD, multiple: false },
   { slug: "text-to-word", category: "docs", from: "text", to: "word", accept: TEXT, multiple: false, paste: true },

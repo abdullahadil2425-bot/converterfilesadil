@@ -1,6 +1,7 @@
 // Every conversion runs in the visitor's browser. Libraries load lazily per tool.
 import { parsePageRanges } from "../page-ranges";
 import * as docs from "./docs";
+import * as secure from "./secure";
 import { escapeHtml, htmlToPdf, sanitizeHtml, textToHtml } from "./render-html";
 import { baseName, encodeBmp, encodeIco, isRtl, one, readInput, textBlob, wrapHtml, ToolError, type OutFile } from "./shared";
 
@@ -13,6 +14,9 @@ export type RunOptions = {
   pages: string;
   watermark: string;
   pasted: string;
+  password: string;
+  signature: string;
+  signWhere: secure.SignWhere;
 };
 const PDF_MIME = "application/pdf";
 
@@ -479,6 +483,9 @@ export const HANDLERS: Record<string, Handler> = {
   "add-watermark": (f, o) => addWatermark(one(f), o.watermark),
   "delete-pages": (f, o) => selectPages(one(f), o.pages, "remove"),
   "extract-pages": (f, o) => selectPages(one(f), o.pages, "keep"),
+  "protect-pdf": (f, o) => secure.protectPdf(one(f), o.password),
+  "unlock-pdf": (f, o) => secure.unlockPdf(one(f), o.password),
+  "sign-pdf": (f, o) => secure.signPdf(one(f), o.signature, o.signWhere),
   "word-to-text": (f) => docs.wordToText(f),
   "word-to-html": (f) => docs.wordToHtml(f),
   "text-to-word": (f, o) => docs.textToWord(f, o.pasted),
