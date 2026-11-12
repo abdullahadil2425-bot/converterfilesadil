@@ -12,7 +12,9 @@ import { Route as ToolRoute } from "@/routes/{-$lang}/tools.$slug";
 import { Route as ToolsRoute } from "@/routes/{-$lang}/tools.index";
 import { Route as SitemapRoute } from "@/routes/sitemap[.]xml";
 
-type Head = { meta?: Record<string, string>[]; links?: Record<string, string>[] };
+type MetaTag = { title?: string; name?: string; property?: string; content?: string };
+type LinkTag = { rel?: string; href?: string };
+type Head = { meta?: MetaTag[]; links?: LinkTag[] };
 
 const ORIGIN = "https://pdf-adil.example";
 const param = (lang: Lang) => (lang === "en" ? undefined : lang);
@@ -94,7 +96,7 @@ describe("SEO for every language", () => {
 
     if (lang !== "en") {
       it("uses translated titles, not the English ones", () => {
-        const translated = PATHS.filter((p) => seoHead(lang, p).meta[0].title !== seoHead("en", p).meta[0].title);
+        const translated = PATHS.filter((p) => titleOf(seoHead(lang, p)) !== titleOf(seoHead("en", p)));
         expect(translated).toEqual(PATHS);
       });
     }
@@ -114,7 +116,7 @@ describe("sitemap.xml", () => {
     const xml = await fetchSitemap();
     const blocks = xml.split("<url>").slice(1);
     for (const block of blocks) {
-      const loc = block.match(/<loc>([^<]+)<\/loc>/)![1];
+      const loc = block.match(/<loc>([^<]+)<\/loc>/)?.[1] ?? "";
       const path = loc.replace(ORIGIN, "").replace(/^\/(ps|fa|ar|ur|hi|tr|fr|es|de|ru|zh)(?=\/|$)/, "") || "/";
       for (const l of ALL_LANGS) {
         expect(block, loc).toContain(`hreflang="${l}" href="${ORIGIN}${localizedPath(l, path)}"`);
