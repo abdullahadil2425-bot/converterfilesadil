@@ -65,7 +65,7 @@ export function ToolWorkspace({ tool }: { tool: ToolDef }) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<DictKey | null>(null);
   const [results, setResults] = useState<Result[]>([]);
-  const [opts, setOpts] = useState<RunOptions>({ quality: "med", angle: 90, pages: "", watermark: "", pasted: "" });
+  const [opts, setOpts] = useState<RunOptions>({ quality: "med", angle: 90, pages: "", watermark: "", pasted: "", password: "", signature: "", signWhere: "last" });
 
   useEffect(() => () => results.forEach((r) => URL.revokeObjectURL(r.url)), [results]);
 
@@ -105,7 +105,7 @@ export function ToolWorkspace({ tool }: { tool: ToolDef }) {
         setStatus("done");
       } catch (err) {
         console.error(err);
-        setError(err instanceof ToolError && err.code === "pages" ? "err_pages" : err instanceof ToolError && err.code === "nofile" ? "err_nofile" : "err_generic");
+        setError(err instanceof ToolError && err.code === "password" ? "err_password" : err instanceof ToolError && err.code === "signature" ? "err_nosign" : err instanceof ToolError && err.code === "pages" ? "err_pages" : err instanceof ToolError && err.code === "nofile" ? "err_nofile" : "err_generic");
         setStatus("error");
       }
     } catch (err) {
@@ -285,6 +285,19 @@ export function ToolWorkspace({ tool }: { tool: ToolDef }) {
                 placeholder="1,3,5-7"
                 value={opts.pages}
                 onChange={(e) => setOpts({ ...opts, pages: e.target.value })}
+                className="max-w-xs rounded-xl bg-background"
+              />
+            </>
+          )}
+          {tool.option === "password" && (
+            <>
+              <Label htmlFor="password">{t("opt_password")}</Label>
+              <Input
+                id="password"
+                type="password"
+                dir="ltr"
+                value={opts.password}
+                onChange={(e) => setOpts({ ...opts, password: e.target.value })}
                 className="max-w-xs rounded-xl bg-background"
               />
             </>
