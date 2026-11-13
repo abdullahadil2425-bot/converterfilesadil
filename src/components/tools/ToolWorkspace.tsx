@@ -11,6 +11,8 @@ import { useI18n } from "@/lib/i18n/context";
 import type { ToolDef } from "@/lib/tools";
 import { cn } from "@/lib/utils";
 
+import { SignaturePad } from "./SignaturePad";
+
 type Status = "idle" | "working" | "done" | "error";
 type Result = OutFile & { url: string };
 
@@ -300,6 +302,24 @@ export function ToolWorkspace({ tool }: { tool: ToolDef }) {
                 onChange={(e) => setOpts({ ...opts, password: e.target.value })}
                 className="max-w-xs rounded-xl bg-background"
               />
+            </>
+          )}
+          {tool.option === "signature" && (
+            <>
+              <Label>{t("opt_signature")}</Label>
+              <SignaturePad clearLabel={t("sign_clear")} onChange={(signature) => setOpts((o) => ({ ...o, signature }))} />
+              <Label className="block pt-3">{t("sign_where")}</Label>
+              <div>
+                <Segmented<"last" | "first" | "all">
+                  value={opts.signWhere}
+                  onChange={(signWhere) => setOpts({ ...opts, signWhere })}
+                  options={[
+                    { value: "last", label: t("sign_last") },
+                    { value: "first", label: t("sign_first") },
+                    { value: "all", label: t("sign_all") },
+                  ]}
+                />
+              </div>
             </>
           )}
           {tool.option === "watermark" && (
