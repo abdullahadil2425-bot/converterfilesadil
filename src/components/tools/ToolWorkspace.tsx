@@ -12,6 +12,7 @@ import type { ToolDef } from "@/lib/tools";
 import { cn } from "@/lib/utils";
 
 import { SignaturePad } from "./SignaturePad";
+import { SignPlacer } from "./SignPlacer";
 
 type Status = "idle" | "working" | "done" | "error";
 type Result = OutFile & { url: string };
@@ -67,13 +68,18 @@ export function ToolWorkspace({ tool }: { tool: ToolDef }) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<DictKey | null>(null);
   const [results, setResults] = useState<Result[]>([]);
-  const [opts, setOpts] = useState<RunOptions>({ quality: "med", angle: 90, pages: "", watermark: "", pasted: "", password: "", signature: "", signWhere: "last" });
+  const [opts, setOpts] = useState<RunOptions>({ quality: "med", angle: 90, pages: "", watermark: "", pasted: "", password: "", signature: "", signWhere: "last", signPage: 1, signBox: { x: 0.63, y: 0.84, w: 0.3 } });
+  const [pageCount, setPageCount] = useState(0);
 
   useEffect(() => () => results.forEach((r) => URL.revokeObjectURL(r.url)), [results]);
 
   const addFiles = (list: FileList | null) => {
     if (!list || list.length === 0) return;
     const incoming = Array.from(list);
+    if (incoming.some((f) => f.size > 100 * 1024 * 1024)) {
+      setError("err_toolarge");
+      return;
+    }
     setFiles((prev) => (tool.multiple ? [...prev, ...incoming] : incoming.slice(0, 1)));
     setError(null);
   };
@@ -107,7 +113,8 @@ export function ToolWorkspace({ tool }: { tool: ToolDef }) {
         setStatus("done");
       } catch (err) {
         console.error(err);
-        setError(err instanceof ToolError && err.code === "password" ? "err_password" : err instanceof ToolError && err.code === "signature" ? "err_nosign" : err instanceof ToolError && err.code === "pages" ? "err_pages" : err instanceof ToolError && err.code === "nofile" ? "err_nofile" : "err_generic");
+        const map: Record<string, DictKey> = { password: "err_password", signature: "err_nosign", pages: "err_pages", nofile: "err_nofile", locked: "err_locked", notext: "err_notext", badtype: "err_badtype", toolarge: "err_toolarge" };
+        setError(err instanceof ToolError ? (map[err.code] ?? "err_generic") : "err_generic");
         setStatus("error");
       }
     } catch (err) {
@@ -193,6 +200,7 @@ export function ToolWorkspace({ tool }: { tool: ToolDef }) {
         </span>
         <p className="font-display text-xl font-semibold">{t("drop_title")}</p>
         <p className="text-sm text-muted-foreground">{t("drop_hint")}</p>
+        <p className="text-xs text-muted-foreground">{t("limit_note")}</p>
         <input
           ref={inputRef}
           type="file"
@@ -217,7 +225,7 @@ export function ToolWorkspace({ tool }: { tool: ToolDef }) {
                 <span dir="ltr" className="text-xs text-muted-foreground">{formatSize(f.size)}</span>
                 <button
                   type="button"
-                  aria-label="Remove"
+                  aria-label={t("remove")}
                   onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
                   className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
                 >
@@ -310,16 +318,46 @@ export function ToolWorkspace({ tool }: { tool: ToolDef }) {
               <SignaturePad clearLabel={t("sign_clear")} onChange={(signature) => setOpts((o) => ({ ...o, signature }))} />
               <Label className="block pt-3">{t("sign_where")}</Label>
               <div>
-                <Segmented<"last" | "first" | "all">
+                <Segmented<"last" | "first" | "all" | "page">
                   value={opts.signWhere}
                   onChange={(signWhere) => setOpts({ ...opts, signWhere })}
                   options={[
                     { value: "last", label: t("sign_last") },
                     { value: "first", label: t("sign_first") },
                     { value: "all", label: t("sign_all") },
+                    { value: "page", label: t("sign_page") },
                   ]}
                 />
               </div>
+              {opts.signWhere === "page" && (
+                <div className="pt-2">
+                  <Label htmlFor="signPage">{t("sign_page_no")}</Label>
+                  <Input
+                    id="signPage"
+                    type="number"
+                    dir="ltr"
+                    min={1}
+                    max={pageCount || undefined}
+                    value={opts.signPage}
+                    onChange={(e) => setOpts({ ...opts, signPage: Math.max(1, Number(e.target.value) || 1) })}
+                    className="mt-1 max-w-[8rem] rounded-xl bg-background"
+                  />
+                </div>
+              )}
+              {files[0] && (
+                <div className="pt-3">
+                  <SignPlacer
+                    file={files[0]}
+                    page={opts.signWhere === "last" ? pageCount || 1 : opts.signWhere === "page" ? opts.signPage : 1}
+                    signature={opts.signature}
+                    box={opts.signBox}
+                    onBoxChange={(signBox) => setOpts((o) => ({ ...o, signBox }))}
+                    onPageCount={setPageCount}
+                    sizeLabel={t("sign_size")}
+                    dragHint={t("sign_drag")}
+                  />
+                </div>
+              )}
             </>
           )}
           {tool.option === "watermark" && (
@@ -345,7 +383,7 @@ export function ToolWorkspace({ tool }: { tool: ToolDef }) {
       )}
 
       <div className="mt-6 flex flex-col items-center gap-3">
-        <Button size="lg" onClick={run} disabled={working} className="min-w-48 gap-2 rounded-full text-base shadow-lift">
+        <Button size="lg" onClick={run} disabled={working || (files.length === 0 && !(tool.paste && opts.pasted.trim()))} className="min-w-48 gap-2 rounded-full text-base shadow-lift">
           {working && <Loader2 className="size-5 animate-spin" />}
           {working ? t("working") : t("start")}
         </Button>
