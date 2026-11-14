@@ -1,10 +1,15 @@
 export type OutFile = { name: string; blob: Blob };
 
+export type ToolErrorCode = "pages" | "nofile" | "generic" | "password" | "signature" | "locked" | "notext" | "badtype" | "toolarge";
+
 export class ToolError extends Error {
-  constructor(public code: "pages" | "nofile" | "generic" | "password" | "signature") {
+  constructor(public code: ToolErrorCode) {
     super(code);
   }
 }
+
+/** Per-file limit; larger files tend to crash browser tabs on phones. */
+export const MAX_FILE_BYTES = 100 * 1024 * 1024;
 
 export const baseName = (name: string) => name.replace(/\.[^.]+$/, "") || "file";
 
