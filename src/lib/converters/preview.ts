@@ -23,6 +23,6 @@ export async function renderPagePreview(file: File, pageNumber: number, width = 
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   await page.render({ canvas, canvasContext: ctx, viewport }).promise;
   const numPages = doc.numPages;
-  await doc.destroy();
+  await doc.cleanup();
   return { url: canvas.toDataURL("image/jpeg", 0.85), numPages };
 }
