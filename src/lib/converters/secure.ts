@@ -1,7 +1,8 @@
 // Password and signature tools. Uses the pdf-lib fork that supports encryption.
+import { openPdfForEdit } from "./pdf-open";
 import { baseName, ToolError, type OutFile } from "./shared";
 
-export type SignWhere = "last" | "first" | "all";
+export type SignWhere = "last" | "first" | "all" | "page";
 
 async function lib() {
   return import("@cantoo/pdf-lib");
@@ -38,19 +39,40 @@ export async function unlockPdf(file: File, password: string): Promise<OutFile[]
   return [await save(doc, `${baseName(file.name)}-unlocked.pdf`)];
 }
 
-export async function signPdf(file: File, signaturePng: string, where: SignWhere): Promise<OutFile[]> {
+/** Signature box as fractions of the page: top-left corner (x, y) and width w. */
+export type SignBox = { x: number; y: number; w: number };
+export const DEFAULT_SIGN_BOX: SignBox = { x: 0.63, y: 0.84, w: 0.3 };
+
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+export async function signPdf(
+  file: File,
+  signaturePng: string,
+  { where, page = 1, box = DEFAULT_SIGN_BOX }: { where: SignWhere; page?: number; box?: SignBox },
+): Promise<OutFile[]> {
   if (!signaturePng) throw new ToolError("signature");
-  const { PDFDocument } = await lib();
-  const doc = await PDFDocument.load(await file.arrayBuffer(), { ignoreEncryption: true });
+  const { doc } = await openPdfForEdit(await file.arrayBuffer());
   const bytes = Uint8Array.from(atob(signaturePng.split(",")[1] ?? ""), (c) => c.charCodeAt(0));
   const img = await doc.embedPng(bytes);
   const pages = doc.getPages();
-  const targets = where === "all" ? pages : where === "first" ? pages.slice(0, 1) : pages.slice(-1);
-  for (const page of targets) {
-    const pw = page.getWidth();
-    const w = pw * 0.3;
-    const h = (w * img.height) / img.width;
-    page.drawImage(img, { x: pw - w - pw * 0.07, y: page.getHeight() * 0.06, width: w, height: h });
+  let targets = pages;
+  if (where === "first") targets = pages.slice(0, 1);
+  else if (where === "last") targets = pages.slice(-1);
+  else if (where === "page") {
+    const chosen = pages[page - 1];
+    if (!Number.isInteger(page) || !chosen) throw new ToolError("pages");
+    targets = [chosen];
   }
-  return [await save(doc, `${baseName(file.name)}-signed.pdf`)];
+  const w = clamp(box.w, 0.05, 1);
+  for (const p of targets) {
+    // Use the visible page area so placement matches the on-screen preview.
+    const { width: pw, height: ph } = p.getSize();
+    const width = pw * w;
+    const height = (width * img.height) / img.width;
+    const x = clamp(box.x, 0, 1 - w) * pw;
+    const top = clamp(box.y, 0, 1) * ph;
+    p.drawImage(img, { x, y: Math.max(0, ph - top - height), width, height });
+  }
+  const out = await doc.save();
+  return [{ name: `${baseName(file.name)}-signed.pdf`, blob: new Blob([new Uint8Array(out)], { type: "application/pdf" }) }];
 }

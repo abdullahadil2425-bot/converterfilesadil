@@ -1,5 +1,8 @@
 // Every conversion runs in the visitor's browser. Libraries load lazily per tool.
 import { parsePageRanges } from "../page-ranges";
+import { getTool } from "../tools";
+import { openPdfForEdit, pdfJsError } from "./pdf-open";
+import { validateFiles } from "./validate";
 import * as docs from "./docs";
 import * as secure from "./secure";
 import { escapeHtml, htmlToPdf, sanitizeHtml, textToHtml } from "./render-html";
@@ -17,6 +20,9 @@ export type RunOptions = {
   password: string;
   signature: string;
   signWhere: secure.SignWhere;
+  /** 1-based page used when signWhere is "page". */
+  signPage: number;
+  signBox: secure.SignBox;
 };
 const PDF_MIME = "application/pdf";
 
@@ -33,7 +39,11 @@ async function loadPdfJs() {
 
 async function openPdf(file: File) {
   const lib = await loadPdfJs();
-  return lib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+  try {
+    return await lib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+  } catch (err) {
+    throw pdfJsError(err);
+  }
 }
 
 function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality?: number): Promise<Blob> {
@@ -123,6 +133,8 @@ async function extractPdfLines(file: File): Promise<Line[][]> {
     page.cleanup();
   }
   await doc.cleanup();
+  // A PDF made only of scanned images has no text layer; say so instead of returning an empty file.
+  if (!pages.some((lines) => lines.some((l) => l.text))) throw new ToolError("notext");
   return pages;
 }
 
@@ -304,9 +316,7 @@ async function pdfToPowerPoint(file: File): Promise<OutFile[]> {
 }
 
 async function loadPdfLib(file: File) {
-  const lib = await import("pdf-lib");
-  const doc = await lib.PDFDocument.load(await file.arrayBuffer(), { ignoreEncryption: true });
-  return { lib, doc };
+  return openPdfForEdit(await file.arrayBuffer());
 }
 
 async function savePdf(doc: { save: () => Promise<Uint8Array> }, name: string): Promise<OutFile> {
@@ -318,7 +328,7 @@ async function mergePdf(files: File[]): Promise<OutFile[]> {
   const { PDFDocument } = await import("pdf-lib");
   const out = await PDFDocument.create();
   for (const file of files) {
-    const src = await PDFDocument.load(await file.arrayBuffer(), { ignoreEncryption: true });
+    const { doc: src } = await openPdfForEdit(await file.arrayBuffer());
     const pages = await out.copyPages(src, src.getPageIndices());
     pages.forEach((p) => out.addPage(p));
   }
@@ -485,7 +495,7 @@ export const HANDLERS: Record<string, Handler> = {
   "extract-pages": (f, o) => selectPages(one(f), o.pages, "keep"),
   "protect-pdf": (f, o) => secure.protectPdf(one(f), o.password),
   "unlock-pdf": (f, o) => secure.unlockPdf(one(f), o.password),
-  "sign-pdf": (f, o) => secure.signPdf(one(f), o.signature, o.signWhere),
+  "sign-pdf": (f, o) => secure.signPdf(one(f), o.signature, { where: o.signWhere, page: o.signPage, box: o.signBox }),
   "word-to-text": (f) => docs.wordToText(f),
   "word-to-html": (f) => docs.wordToHtml(f),
   "text-to-word": (f, o) => docs.textToWord(f, o.pasted),
@@ -508,7 +518,9 @@ export const HANDLERS: Record<string, Handler> = {
 
 export async function runTool(slug: string, files: File[], opts: RunOptions): Promise<OutFile[]> {
   const handler = HANDLERS[slug];
-  if (!handler) throw new ToolError("generic");
+  const tool = getTool(slug);
+  if (!handler || !tool) throw new ToolError("generic");
+  await validateFiles(tool.from, files);
   return handler(files, opts);
 }
 
