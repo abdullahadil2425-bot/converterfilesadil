@@ -9,3 +9,12 @@
 - [ ] Stage 7: Privacy & Terms pages accurate; performance review
 - [ ] Stage 8: SEO + FAQ / formats / help pages
 - [ ] Stage 9: Regression tests + final report
+
+## Owner brief 2026-11-16 (security/QA audit)
+- [ ] P1 xlsx security update (official SheetJS tarball)
+- [ ] P2 total size + file count limits for batches, shown in UI, tests
+- [ ] P3 HTML sanitizing: no scripts/handlers/remote URLs; tests
+- [ ] P4 Compress = image-based note; Sign = drawn image, not digital certificate
+- [ ] P5 Accessibility, translated aria labels, reduced motion
+- [ ] P6 Privacy page matches real behavior
+- [ ] P7 Real conversion tests per tool family
