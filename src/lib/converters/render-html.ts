@@ -23,18 +23,42 @@ export function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] ?? c);
 }
 
-/** Removes scripts and inline event handlers from user-provided HTML. */
+const SAFE_DATA_IMG = /^data:image\/(png|jpe?g|gif|webp);base64,[a-z0-9+/=\s]+$/i;
+const URL_ATTRS = ["src", "href", "srcset", "action", "formaction", "poster", "background", "xlink:href", "data", "ping", "lowsrc", "longdesc", "manifest", "cite"];
+
+/** Drops url(...) and @import from CSS so no remote file can load. */
+export function stripCssUrls(css: string): string {
+  return css
+    .replace(/@import[^;]*;?/gi, "")
+    .replace(/url\s*\([^)]*\)/gi, "none")
+    .replace(/expression\s*\(/gi, "(")
+    .replace(/image-set\s*\([^)]*\)/gi, "none");
+}
+
+/**
+ * Removes scripts, event handlers and every remote resource from user HTML.
+ * Only inline base64 PNG/JPEG/GIF/WEBP images survive, so nothing is fetched from the network.
+ */
 export function sanitizeHtml(html: string): string {
   const doc = new DOMParser().parseFromString(html, "text/html");
-  doc.querySelectorAll("script, iframe, object, embed, link[rel=import]").forEach((el) => el.remove());
+  doc
+    .querySelectorAll("script, noscript, iframe, frame, frameset, object, embed, applet, link, meta, base, svg, math, video, audio, source, track, picture, form, template, portal")
+    .forEach((el) => el.remove());
   doc.querySelectorAll("*").forEach((el) => {
     for (const attr of Array.from(el.attributes)) {
-      if (attr.name.toLowerCase().startsWith("on")) el.removeAttribute(attr.name);
-      if (/^\s*javascript:/i.test(attr.value)) el.removeAttribute(attr.name);
+      const name = attr.name.toLowerCase();
+      if (name.startsWith("on")) el.removeAttribute(attr.name);
+      else if (name === "style") el.setAttribute("style", stripCssUrls(attr.value));
+      else if (URL_ATTRS.includes(name)) {
+        const keep = el.tagName === "IMG" && name === "src" && SAFE_DATA_IMG.test(attr.value.trim());
+        const anchor = el.tagName === "A" && name === "href" && /^\s*(https?:|mailto:|#)/i.test(attr.value);
+        if (!keep && !anchor) el.removeAttribute(attr.name);
+      }
     }
   });
-  const styles = Array.from(doc.head.querySelectorAll("style"))
-    .map((s) => s.outerHTML)
+  doc.querySelectorAll("img:not([src])").forEach((el) => el.remove());
+  const styles = Array.from(doc.querySelectorAll("style"))
+    .map((s) => { const css = stripCssUrls(s.textContent ?? ""); s.remove(); return `<style>${css.replace(/<\/style/gi, "")}</style>`; })
     .join("");
   return styles + doc.body.innerHTML;
 }
@@ -78,7 +102,7 @@ export async function htmlToPdf(html: string): Promise<Blob> {
       ),
     );
 
-    const canvas = await html2canvas(page, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
+    const canvas = await html2canvas(page, { scale: 2, backgroundColor: "#ffffff", useCORS: false });
     const pdf = new jsPDF({ unit: "pt", format: "a4" });
     const pw = pdf.internal.pageSize.getWidth();
     const ph = pdf.internal.pageSize.getHeight();
