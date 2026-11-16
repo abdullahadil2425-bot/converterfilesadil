@@ -92,6 +92,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Convert, merge, split and compress PDF, Word, Excel, PowerPoint and image files for free, in 12 languages.",
       },
       { name: "author", content: "PDF ADIL" },
+      { name: "google-site-verification", content: "U3c6mR4iT6tAT4m6n7C2qikrf5x47jnqW7aP-tRPwm0" },
       { name: "theme-color", content: "#fbf7ef" },
       { property: "og:site_name", content: "PDF ADIL" },
       { property: "og:title", content: "PDF ADIL — Free Online PDF & File Converter" },
