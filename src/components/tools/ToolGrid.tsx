@@ -13,13 +13,12 @@ export function ToolGrid() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap justify-center gap-2" role="tablist">
+      <div className="flex flex-wrap justify-center gap-2" aria-label={t("tools_title")}>
         {(["all", ...CATEGORIES] as const).map((cat) => (
           <button
             key={cat}
             type="button"
-            role="tab"
-            aria-selected={active === cat}
+            aria-pressed={active === cat}
             onClick={() => setActive(cat)}
             className={cn(
               "rounded-full border px-4 py-2 text-sm font-semibold transition-colors",

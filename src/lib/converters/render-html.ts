@@ -23,20 +23,31 @@ export function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] ?? c);
 }
 
-/** Removes scripts and inline event handlers from user-provided HTML. */
+/** Removes active content and network-loaded resources from user-provided HTML. */
 export function sanitizeHtml(html: string): string {
   const doc = new DOMParser().parseFromString(html, "text/html");
-  doc.querySelectorAll("script, iframe, object, embed, link[rel=import]").forEach((el) => el.remove());
+  doc.querySelectorAll("script, iframe, object, embed, link, audio, video, source, svg, math").forEach((el) => el.remove());
   doc.querySelectorAll("*").forEach((el) => {
     for (const attr of Array.from(el.attributes)) {
-      if (attr.name.toLowerCase().startsWith("on")) el.removeAttribute(attr.name);
-      if (/^\s*javascript:/i.test(attr.value)) el.removeAttribute(attr.name);
+      const name = attr.name.toLowerCase();
+      const value = attr.value.trim();
+      if (name.startsWith("on") || name === "srcset" || name === "poster") {
+        el.removeAttribute(attr.name);
+      } else if (["src", "href", "xlink:href", "action", "formaction"].includes(name)) {
+        // Keep only embedded image data. Never make the browser fetch a file-provided URL.
+        if (name === "src" && el.tagName === "IMG" && /^data:image\//i.test(value)) continue;
+        el.removeAttribute(attr.name);
+      } else if (name === "style") {
+        // Inline styles can initiate requests through url() or @import.
+        el.removeAttribute(attr.name);
+      } else if (/^\s*javascript:/i.test(value)) {
+        el.removeAttribute(attr.name);
+      }
     }
   });
-  const styles = Array.from(doc.head.querySelectorAll("style"))
-    .map((s) => s.outerHTML)
-    .join("");
-  return styles + doc.body.innerHTML;
+  // User stylesheet content may load remote fonts, images, or imports.
+  doc.querySelectorAll("style").forEach((el) => el.remove());
+  return doc.body.innerHTML;
 }
 
 export async function htmlToPdf(html: string): Promise<Blob> {
@@ -78,7 +89,7 @@ export async function htmlToPdf(html: string): Promise<Blob> {
       ),
     );
 
-    const canvas = await html2canvas(page, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
+    const canvas = await html2canvas(page, { scale: 2, backgroundColor: "#ffffff", useCORS: false });
     const pdf = new jsPDF({ unit: "pt", format: "a4" });
     const pw = pdf.internal.pageSize.getWidth();
     const ph = pdf.internal.pageSize.getHeight();

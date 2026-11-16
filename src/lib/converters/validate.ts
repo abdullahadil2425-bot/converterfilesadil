@@ -2,6 +2,9 @@
 import type { Fmt } from "../tools";
 import { MAX_FILE_BYTES, ToolError } from "./shared";
 
+const MAX_BATCH_FILES = 20;
+const MAX_BATCH_BYTES = 100 * 1024 * 1024;
+
 const ext = (name: string) => name.toLowerCase().split(".").pop() ?? "";
 
 function startsWith(head: Uint8Array, bytes: number[]) {
@@ -48,6 +51,9 @@ export function looksLike(from: Fmt, file: File, head: Uint8Array): boolean {
 }
 
 export async function validateFiles(from: Fmt, files: File[]): Promise<void> {
+  if (files.length > MAX_BATCH_FILES || files.reduce((total, file) => total + file.size, 0) > MAX_BATCH_BYTES) {
+    throw new ToolError("toolarge");
+  }
   for (const file of files) {
     if (file.size > MAX_FILE_BYTES) throw new ToolError("toolarge");
     const head = new Uint8Array(await file.slice(0, 1024).arrayBuffer());
